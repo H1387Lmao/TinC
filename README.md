@@ -1,3 +1,5 @@
+
+
 # TinC
 `TinC` pronouced as `Tincy` is a small programming language built in python
 
@@ -8,7 +10,7 @@
 # Syntax
 ---
 * TinC statements are ended by a semi-colon, except for scopes
-```
+```rust
 let x = 10;
 fn HelloWorld(){
     printf("Hello world\n");
@@ -18,7 +20,7 @@ fn HelloWorld(){
 * TinC is dynamically typed, so no explicit types are needed
 ---
 * TinC For Loop are like in rust, which returns a list of numbers from start all the way to end
-```
+```rust
 for (i in start..end){
     printf(i);
 }
@@ -26,7 +28,7 @@ for (i in start..end){
 * TinC While loops are the same, but no `break/continue` yet
 ---
 * TinC indexing are like a mix of lua tables and C++ structs, since every single list can be indexed alphanumerically (even negative numbers), the operation for indexing is `->`
-```
+```rust
 let x = [];
 x->0 = "FIRST INDEX YAY";
 printf("%1\n", x->0)
@@ -39,14 +41,14 @@ printf("%1\n", x->0)
 ---
 
 * TinC Assignments are like in Javascript
-```
+```rust
 let x = 0;
 let y = y + 10;
 ```
 ---
 * TinC Reassignments can reassign any variable, like indexes and variables
 
-```
+```rust
 let x = 10;
 x = x + 10;
 x = [];
@@ -56,7 +58,7 @@ x->10 = 10;
 ## Standard Library
 
 * printf
-```c
+```rust
 // 1 <- First, Second -> 2
 printf("%1 <- First, Second-> %2", 1,2)
 
@@ -65,7 +67,7 @@ printf("Hello")
 ```
 
 * format
-```c
+```rust
 // X Variable
 let x = format("%1", "X Variable")
 
