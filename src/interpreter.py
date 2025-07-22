@@ -166,7 +166,7 @@ class Interpreter:
 				if stmt.operation == "-":
 					return -(self.execute_value(stmt.value))
 				if stmt.operation == "+":
-					return math.abs(self.execute_value(stmt.value))
+					return abs(self.execute_value(stmt.value))
 			elif stmt.type == "Binop":
 				left = self.execute_value(stmt.left)
 				right = self.execute_value(stmt.right)

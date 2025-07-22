@@ -23,7 +23,7 @@ fn hello(){
 }
 
 fn returnable(){
-	return 9990;
+	return +-!-!-!-!9990;
 }
 
 for(i in 0..10){
