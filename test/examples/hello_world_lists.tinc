@@ -22,6 +22,10 @@ fn hello(){
 	printf("Hello from hello function\n");
 }
 
+fn returnable(){
+	return 9990;
+}
+
 for(i in 0..10){
 	empty->i = i;
 	hello();
@@ -29,4 +33,4 @@ for(i in 0..10){
 
 printf(format("%1\n",10));
 
-
+printf(returnable());

@@ -176,6 +176,11 @@ class Parser:
 			scope = self.parse_scope()
 
 			return AST(type="FunctionDeclare", name=name, arguments=arguments, stmts=scope)
+		elif self.pos.peek().v == "?return":
+			self.pos.consume()
+			res= AST(type="Return", value=self.parse_expr())
+			self.pos.expect(";")
+			return res
 		elif self.pos.peek().t == TokenTypes.IDENTIFIER:
 			if self.pos.peek(2).v == "(":
 				return self.parse_fc()

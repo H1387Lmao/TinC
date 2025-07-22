@@ -119,6 +119,9 @@ class Interpreter:
 				self.execute_scope(stmt.stmts)
 		elif stmt.type == "FunctionCall":
 			return self.execute_value(stmt)
+		elif stmt.type == "Return":
+			self.get_scope()["return_value"] = self.execute_value(stmt.value)
+			return
 		elif stmt.type == "SetAttribute":
 			if stmt.target.type != "GetAttribute":
 				errors.InterpreterError(0, "Runtime Error: Expected attribute for SetAttribute")
