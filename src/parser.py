@@ -60,7 +60,8 @@ class Parser:
 	
 	def parse_scope(self):
 		self.pos.expect("{")
-		return AST(type="Scope", stmts=self.parse_stmts("}"))
+		stmts = self.parse_stmts(f"}}") # Fix for Lite XL Python SyntaxHighlighting
+		return AST(type="Scope", stmts=stmts)
 
 	def parse_condition(self):
 		self.pos.expect("(")
@@ -91,11 +92,11 @@ class Parser:
 
 		return ls
 
-	def parse_fc(self):
+	def parse_fc(self, need_expect=True):
 		name = self.pos.consume().v
 		self.pos.expect('(')
 		args = self.parse_list(")")
-		self.pos.expect(';')
+		_ = self.pos.expect(';') if need_expect else None
 		return AST(type="FunctionCall", name=name,args=args)
 
 	def parse_factor(self):
@@ -117,7 +118,7 @@ class Parser:
 			if self.pos.peek(2).t == TokenTypes.ARROW:
 				return self.parse_getattr()
 			elif self.pos.peek(2).v == "(":
-				return self.parse_fc()
+				return self.parse_fc(need_expect=False)
 			return self.pos.consume().v
 		elif self.pos.peek().v == "[":
 			self.pos.expect('[')
@@ -166,6 +167,15 @@ class Parser:
 			scope = self.parse_scope()
 
 			return AST(type="For", condition=condition, stmts=scope)
+		elif self.pos.peek().v == "?fn":
+			self.pos.consume()
+			name = self.pos.consume().v
+			self.pos.expect("(")
+			arguments = self.parse_list(")")
+
+			scope = self.parse_scope()
+
+			return AST(type="FunctionDeclare", name=name, arguments=arguments, stmts=scope)
 		elif self.pos.peek().t == TokenTypes.IDENTIFIER:
 			if self.pos.peek(2).v == "(":
 				return self.parse_fc()

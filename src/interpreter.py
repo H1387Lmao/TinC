@@ -6,13 +6,35 @@ from stdlibrary import *
 class CustomClass:
 	pass
 
+class CustomFunction:
+	def __init__(self, name, params, stmts):
+		self.name = name
+		self.params = params
+		self.stmts = stmts
+	def _call(self, interpreter, *arguments):
+		args = {}
+		for i in self.params:
+			if len(arguments) <= i:
+				args[i] = None
+			else:
+				args[i] = arguments[i]
+		interpreter.scopes.append({})
+		function_scope = interpreter.get_scope()
+		function_scope['return_value'] = None
+		for arg_name, arg_value in args:
+			function_scope[arg_name] = arg_value
+		interpreter.execute_stmts(self.stmts.stmts)
+		return interpreter.scopes.pop()['return_value']
+
+		
+
 class MathEval:
 	_numeric = ((int, int),)
 	_string_numeric = ((str, str), (int, int))
 	_string_int = ((str, int),(int, str))
 
 	pairs = {
-		"add": _string_numeric + _string_int,
+		"add": _string_numeric,
 		"sub": _numeric,
 		"mul": _numeric + _string_int,
 		"div": _numeric,
@@ -34,13 +56,6 @@ class MathEval:
 				elif op == "mul":
 					return a*b
 				elif op == "add":
-					# javascript behaviour because im too lazy to make a printf
-					if isinstance(a, str):
-						if isinstance(b, int):
-							return a+str(b)
-					if isinstance(b, str):
-						if isinstance(a, int):
-							return str(a)+b
 					return a+b
 				elif op == "sub":
 					return a-b
@@ -103,7 +118,7 @@ class Interpreter:
 			while self.execute_value(stmt.condition):
 				self.execute_scope(stmt.stmts)
 		elif stmt.type == "FunctionCall":
-			self.execute_value(stmt)
+			return self.execute_value(stmt)
 		elif stmt.type == "SetAttribute":
 			if stmt.target.type != "GetAttribute":
 				errors.InterpreterError(0, "Runtime Error: Expected attribute for SetAttribute")
@@ -136,6 +151,9 @@ class Interpreter:
 				self.get_scope()[var_name] = v
 				self.execute_stmts(stmt.stmts.stmts)
 			self.scopes.pop()
+		elif stmt.type == "FunctionDeclare":
+			scope = self.get_scope()
+			scope[stmt.name] = CustomFunction(name=stmt.name, params=stmt.arguments, stmts=stmt.stmts)
 
 	def execute_value(self, stmt):
 		if isinstance(stmt,AST):
@@ -167,8 +185,11 @@ class Interpreter:
 					return self.math.eval(stmt, method, left, right)
 			elif stmt.type == "FunctionCall":
 				if stmt.name in stdlibrary:
-					return stdlibrary[stmt.name](map(self.execute_value, stmt.args))
-				errors.InterpreterError(stmt, f"Not Implemented Custom Functions like {stmt.name}")
+					return stdlibrary[stmt.name](*map(self.execute_value, stmt.args))._call()
+				scope, res = self.get_variable(stmt.name)
+				if res is None: errors.InterpreterError(0, f"Variable Error: Function {stmt.name} is not defined")
+				if not isinstance(res, CustomFunction): errors.InterpreterError(0, f"Variable Error: Variable {stmt.name} is not a function")
+				return res._call(self,*stmt.args)
 			elif stmt.type == "String":
 				formatted = ""
 				backslash=False

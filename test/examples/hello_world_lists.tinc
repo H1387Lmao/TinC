@@ -2,25 +2,31 @@ let x = ["Hello World", "Hi World"];
 let y = 0;
 
 while(y!=2){
-	println(x->y);
+	printf("%1\n",x->y);
 	y = y + 1;
 }
 
 for(i in 0..10){
-	print(i+", ");
 	if (i == 10){
-		print("\nYAY THIS LOOP IS FINISHED\n");
+		printf("\nYAY THIS LOOP IS FINISHED\n");
 	}
 }
 
 for(i in x){
-	println(i);
+	printf("%1\n",i);
 }
 
 let empty = [];
 
+fn hello(){
+	printf("Hello from hello function\n");
+}
+
 for(i in 0..10){
 	empty->i = i;
-	println(empty);
+	hello();
 }
+
+printf(format("%1\n",10));
+
 

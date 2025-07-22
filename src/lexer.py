@@ -3,7 +3,7 @@ from position import *
 import errors
 import re
 
-KEYWORDS = ("let", "if", "while", 'for','in')
+KEYWORDS = ("let", "if", "while", 'for','in', 'fn', 'return')
 
 class Lexer:
 	def __init__(self, source):

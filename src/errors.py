@@ -31,11 +31,12 @@ class BaseError:
 
 	def print_error(self, msg):
 		formatted = re.sub(r'%([^%]+)%', self.replace_keyword, msg)
-		print(f"{self.__class__.__name__}: {formatted}")
-		print(f"    --> Line {self.line}, Column {self.col}")
-		src_line = self.getline()
-		print(f"     {src_line}")
-		print(f"     {' ' * (self.col-1)}^")
+		print(formatted)
+		if self.__class__.__name__ != "InterpreterError":
+			print(f"    --> Line {self.line}, Column {self.col}")
+			src_line = self.getline()
+			print(f"     {src_line}")
+			print(f"     {' ' * (self.col-1)}^")
 
 class SyntaxError(BaseError):
 	def __init__(self, tk, msg):
