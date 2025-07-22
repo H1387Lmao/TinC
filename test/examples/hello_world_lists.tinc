@@ -1,0 +1,26 @@
+let x = ["Hello World", "Hi World"];
+let y = 0;
+
+while(y!=2){
+	println(x->y);
+	y = y + 1;
+}
+
+for(i in 0..10){
+	print(i+", ");
+	if (i == 10){
+		print("\nYAY THIS LOOP IS FINISHED\n");
+	}
+}
+
+for(i in x){
+	println(i);
+}
+
+let empty = [];
+
+for(i in 0..10){
+	empty->i = i;
+	println(empty);
+}
+

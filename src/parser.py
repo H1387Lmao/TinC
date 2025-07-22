@@ -49,14 +49,79 @@ class Parser:
 		self.pos.consume()
 		child = self.parse_factor()
 		return AST(type="GetAttribute", parent=parent, target=child)
-		
+
+	def parse_getattr_chain(self):
+		node = self.parse_factor()
+		while self.pos.peek().v == "->":
+			self.pos.consume()  # consume '->'
+			attr = self.pos.expect(TokenTypes.IDENTIFIER)
+			node = AST(type="GetAttribute", parent=node, target=attr.v)
+		return node
+	
+	def parse_scope(self):
+		self.pos.expect("{")
+		return AST(type="Scope", stmts=self.parse_stmts("}"))
+
+	def parse_condition(self):
+		self.pos.expect("(")
+
+		res=self.binop(self.parse_expr, ["==",">=","<=", "<", ">", "!="])
+
+		self.pos.expect(")")
+
+		return res
+	def parse_for_condition(self):
+		self.pos.expect("(")
+
+		res=self.binop(self.parse_expr, ['?in'])
+
+		self.pos.expect(")")
+
+		return res
+
+	def parse_list(self, end):
+		ls = []
+
+		while self.pos.peek().v != end:
+			ls.append(self.parse_expr())
+			if self.pos.peek().v == end:
+				break
+			self.pos.expect(",")
+		self.pos.expect(end)
+
+		return ls
+
+	def parse_fc(self):
+		name = self.pos.consume().v
+		self.pos.expect('(')
+		args = self.parse_list(")")
+		self.pos.expect(';')
+		return AST(type="FunctionCall", name=name,args=args)
+
 	def parse_factor(self):
-		if self.pos.peek().t in [TokenTypes.INT, TokenTypes.STRING]:
+		if self.pos.peek() is None:
+			errors.SyntaxError(self.pos.peek(-1), f"Syntax Error: Recieved EOF before factor")
+		if self.pos.peek().t == TokenTypes.INT:
+			if self.pos.peek(2).v == "..":
+				if self.pos.peek(3).t == TokenTypes.INT:
+					res = range(self.pos.consume().v, self.pos.peek(2).v+1)
+					self.pos.consume()
+					self.pos.consume()
+					return res
+				else:
+					errors.SyntaxError(self.pos.peek(-1), f"Syntax Error: Expected 'integer' after '..")
 			return self.pos.consume().v
+		elif self.pos.peek().t == TokenTypes.STRING:
+			return AST(type="String", value=self.pos.consume().v)
 		elif self.pos.peek().t == TokenTypes.IDENTIFIER:
 			if self.pos.peek(2).t == TokenTypes.ARROW:
 				return self.parse_getattr()
+			elif self.pos.peek(2).v == "(":
+				return self.parse_fc()
 			return self.pos.consume().v
+		elif self.pos.peek().v == "[":
+			self.pos.expect('[')
+			return AST(type="List", value=self.parse_list("]"))
 		elif self.pos.peek().v == '(':
 			self.pos.consume()
 			res = self.parse_expr()
@@ -83,27 +148,57 @@ class Parser:
 			value = self.parse_expr()
 			self.pos.expect(';')
 			return AST(type="Assign", target=name, value=value)
+		elif self.pos.peek().v == "?if":
+			self.pos.consume()
+			condition = self.parse_condition()
+			scope = self.parse_scope()
+
+			return AST(type="If", condition=condition, stmts=scope)
+		elif self.pos.peek().v == "?while":
+			self.pos.consume()
+			condition = self.parse_condition()
+			scope = self.parse_scope()
+
+			return AST(type="While", condition=condition, stmts=scope)
+		elif self.pos.peek().v == "?for":
+			self.pos.consume()
+			condition = self.parse_for_condition()
+			scope = self.parse_scope()
+
+			return AST(type="For", condition=condition, stmts=scope)
+		elif self.pos.peek().t == TokenTypes.IDENTIFIER:
+			if self.pos.peek(2).v == "(":
+				return self.parse_fc()
+			if not self.pos.peek(2).v == "=":
+				target = self.parse_getattr_chain()
+				if self.pos.peek().v == "=":
+					self.pos.consume()  # consume '='
+					value = self.parse_expr()
+					self.pos.expect(';')
+					return AST(type="SetAttribute", target=target, value=value)
+
+				errors.SyntaxError(self.pos.peek(), f"Syntax Error: Expected statement, got 'identifier'")
+		planb = self.pos.peek()
+		target = self.parse_factor()
+		if isinstance(target, AST):
+			self.pos.consume()
+			value = self.parse_expr()
+			self.pos.expect(';')
 		else:
-			planb = self.pos.peek()
-			target = self.parse_factor()
-			if isinstance(target, AST):
-				self.pos.consume()
-				value = self.parse_expr()
-				self.pos.expect(';')
-			else:
-				if isinstance(target, int):
-					errors.SyntaxError(self.pos.peek(), f"Syntax Error: Expected identifier, got 'integer'")
-				if planb.t != TokenTypes.IDENTIFIER:
-					errors.SyntaxError(self.pos.peek(), f"Syntax Error: Expected identifier, got 'string'")
-				self.pos.expect("=")
-				value = self.parse_expr()
-				self.pos.expect(';')
-			return AST(type="Reassign", target=target, value=value)
-	def parse_stmts(self, end=TokenTypes.EOF):
+			if isinstance(target, int):
+				errors.SyntaxError(self.pos.peek(), f"Syntax Error: Expected identifier, got 'integer'")
+			if planb.t != TokenTypes.IDENTIFIER:
+				errors.SyntaxError(self.pos.peek(), f"Syntax Error: Expected identifier, got 'string'")
+			self.pos.expect("=")
+			value = self.parse_expr()
+			self.pos.expect(';')
+		return AST(type="Reassign", target=target, value=value)
+	def parse_stmts(self, end="EOF"):
 		stmts=[]
-		while self.pos.peek().t!=end:
+		while self.pos.peek().v!=end:
 			stmts.append(self.parse_stmt())
 			if self.pos.peek().t==end: break
+		self.pos.expect(end)
 		return stmts
 	def parse_prog(self):
 		return AST(type="Program", stmts=self.parse_stmts())

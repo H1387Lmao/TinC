@@ -1,0 +1,73 @@
+%YAML 1.2
+---
+name: TinC
+file_extensions:
+  - tinc
+scope: source.tinc
+
+contexts:
+  main:
+    - include: comments
+    - include: strings
+    - include: numbers
+    - include: keywords
+    - include: functions
+    - include: attributes
+    - include: brackets
+    - include: operators
+    - include: identifiers
+
+  comments:
+    - match: '//.*$'
+      scope: comment.line.double-slash.tinc
+    - match: '/\*'
+      scope: comment.block.tinc
+      push:
+        - meta_scope: comment.block.tinc
+        - match: '\*/'
+          pop: true
+
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.tinc
+      push:
+        - meta_scope: string.quoted.double.tinc
+        - match: '"'
+          scope: punctuation.definition.string.end.tinc
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.tinc
+
+  numbers:
+    - match: \b\d+(\.\d+)?\b
+      scope: constant.numeric.tinc
+
+  keywords:
+    - match: \b(let|if|while|for|in)\b
+      scope: keyword.control.tinc
+
+  operators:
+    - match: '==|!=|>=|<=|->|=|\+|\-|\*|\/|<|>|\.\.'
+      scope: keyword.operator.tinc
+
+  brackets:
+    - match: '[\{\}]'
+      scope: punctuation.section.block.tinc
+    - match: '[\[\]]'
+      scope: punctuation.section.brackets.tinc
+    - match: '[\(\)]'
+      scope: punctuation.section.parens.tinc
+
+  functions:
+    - match: \bfn\b\s+([a-zA-Z_]\w*)
+      captures:
+        0: keyword.control.fn.tinc
+        1: entity.name.function.tinc
+
+  attributes:
+    - match: '->'
+      scope: keyword.operator.attribute.tinc
+
+  identifiers:
+    - match: \b[a-zA-Z_]\w*\b
+      scope: variable.other.tinc

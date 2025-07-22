@@ -3,7 +3,7 @@ from position import *
 import errors
 import re
 
-KEYWORDS = ("let",)
+KEYWORDS = ("let", "if", "while", 'for','in')
 
 class Lexer:
 	def __init__(self, source):
@@ -46,8 +46,10 @@ class Lexer:
 			";": TokenTypes.SEMI,
 			"\"": TokenTypes.DQT,
 			"'": TokenTypes.SQT,
+			",": TokenTypes.COMMA,
+			'..': TokenTypes.RANGE
 		}
-		if char in "+-&|":
+		if char in "+-&|.":
 			if self.position.peek(2) == char:
 				self.position.consume()
 				self.position.consume()
@@ -58,8 +60,8 @@ class Lexer:
 					self.tokens.append(Token(types['->'], "->", self.position.copy()))
 					self.position.consume()
 					return
-				if char == "&":
-					errors.LexerError(char, self.position, "Unknown Symbol: '&'")
+				if char in "&.":
+					errors.LexerError(char, self.position, f"Unknown Symbol: '{char}'")
 				self.tokens.append(Token(types[char], char, self.position.copy()))
 		else:
 			self.position.consume()
@@ -95,12 +97,30 @@ class Lexer:
 				self.position.consume()
 				continue
 
-			if char in "+-*/()[]{}&|!; '\"=<>":
+			if char in "+-*/()[]{}&|!; =<>,.":
 				self.get_identif()
 				if char == " ":
 					self.position.consume()
 					continue
 				self.get_symbol(char)
+			elif char in "\"'":
+				self.get_identif()
+				quote = char
+				self.position.consume()  # consume the opening quote
+				start = self.position
+				value = ""
+				while True:
+					c = self.position.peek()
+					if c is None:
+						errors.LexerError(quote, self.position, "Unterminated string literal")
+					if c == quote:
+						self.position.consume()
+						break
+					value += c
+					self.position.consume()
+				self.tokens.append(Token(TokenTypes.STRING, value, self.position.copy()))
+				continue
+
 			else:
 				self.ctk += char
 				self.position.consume()

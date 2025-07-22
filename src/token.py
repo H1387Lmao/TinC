@@ -15,7 +15,7 @@ class TokenTypes:
 	DECREMENT = 21
 
 	PAREN = 8
-	BRACKET = 9
+	BRACKETS = 9
 	BRACES = 10
 
 	AND = 11
@@ -28,6 +28,8 @@ class TokenTypes:
 	ARROW = 17
 	DQT = 22
 	SQT = 23
+	COMMA = 24
+	RANGE = 25
 	
 	COMPARISON = 18
 
