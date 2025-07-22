@@ -1,6 +1,7 @@
-
+![Banner](resources/BannerIcon.png)
 
 # TinC
+![Icon](resources/Icon.png)
 `TinC` pronouced as `Tincy` is a small programming language built in python
 
 # Why is it named TinC?
