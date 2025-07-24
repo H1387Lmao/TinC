@@ -1,0 +1,5 @@
+use glib;
+use iolib;
+
+let window = createWindow(100,100);
+window->run();

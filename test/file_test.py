@@ -15,7 +15,6 @@ if os.path.isfile(target):
 		content = f.read()
 	tokens = Lexer(content).tokenize()
 	ast = Parser(tokens).parse_prog()
-	print(ast)
 	Interpreter().execute_prog(ast)
 else:
 	print("file not found.")

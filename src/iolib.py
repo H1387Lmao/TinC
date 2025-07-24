@@ -1,10 +1,6 @@
 import re
 import errors
-
-class Function:
-	def __init__(self, name, args):
-		self.name = name
-		self.args = args
+from eval import *
 			
 class printf(Function):
     def __init__(self, fmt, *args):
@@ -28,7 +24,7 @@ class printf(Function):
 
 class format(Function):
     def __init__(self, fmt, *args):
-        super().__init__("printf", args)
+        super().__init__("format", args)
         self.format = fmt
 
         if len(args) == 0:
@@ -45,7 +41,12 @@ class format(Function):
         pattern = re.compile(r"%(\d+)")
         output = pattern.sub(replacer, self.format)
         return output
+class CreateClass:
+    def __init__(self, prototype_table):
+        self.prototype_table = prototype_table
 
-stdlibrary={}
-stdlibrary['printf'] = printf
-stdlibrary['format'] = format
+    def _call(self):
+        new_instance = Table() 
+        new_instance.elements.update(self.prototype_table.elements)
+        new_instance.elements['$class'] = True 
+        return new_instance

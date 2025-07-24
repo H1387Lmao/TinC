@@ -1,9 +1,9 @@
-from token import *
+from tokens import *
 from position import *
 import errors
 import re
 
-KEYWORDS = ("let", "if", "while", 'for','in', 'fn', 'return')
+KEYWORDS = ("let", "if", "while", 'for','in', 'fn', 'return', 'use')
 
 class Lexer:
 	def __init__(self, source):
@@ -19,11 +19,11 @@ class Lexer:
 			elif self.ctk in KEYWORDS:
 				self.tokens.append(Token(TokenTypes.KEYWORD, "?"+self.ctk, self.position.copy()))
 			else:
-				regex=re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+				regex=re.compile(r'^[\$A-Za-z_][A-Za-z0-9_]*$')
 				if bool(regex.match(self.ctk)):
 					self.tokens.append(Token(TokenTypes.IDENTIFIER, self.ctk, self.position.copy()))
 				else:
-					invalid_chars = ''.join(dict.fromkeys(c for c in self.ctk if not re.match(r'[A-Za-z0-9_]', c)))
+					invalid_chars = ''.join(dict.fromkeys(c for c in self.ctk if not re.match(r'[\$A-Za-z0-9_]', c)))
 					label = "Character" if len(invalid_chars) == 1 else "Characters"
 					suffix = "" if len(invalid_chars) == 1 else "s"
 					invalid_chars = "["+", ".join(map(repr,list(invalid_chars)))+"]" if suffix else f"'{invalid_chars}'"

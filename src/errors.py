@@ -31,9 +31,11 @@ class BaseError:
 
 	def print_error(self, msg):
 		formatted = re.sub(r'%([^%]+)%', self.replace_keyword, msg)
+		
 		print(formatted)
-		if self.__class__.__name__ != "InterpreterError":
+		if self.source:
 			print(f"    --> Line {self.line}, Column {self.col}")
+		if self.__class__.__name__ != "InterpreterError":
 			src_line = self.getline()
 			print(f"     {src_line}")
 			print(f"     {' ' * (self.col-1)}^")
@@ -48,4 +50,7 @@ class LexerError(BaseError):
 
 class InterpreterError(BaseError):
 	def __init__(self, ast, msg):
-		super().__init__(ast, 0, 0, 0, "", msg)
+		if hasattr(ast, 'position'):
+			super().__init__(ast, *ast.position.getall(), msg)
+		else:
+			super().__init__(ast, 0,0,0, '', msg)

@@ -1,0 +1,16 @@
+use iolib;
+
+let Instance = [];
+fn Instance->init(name, value){
+	let this = createClass(Instance);
+	this->name=name;
+	this->value = value;
+	fn this->$add(self, other){
+		return self->value + other->value;
+	}
+	return this;
+}
+
+let Number1 = Instance->init("Number", 1);
+let Number2 = Instance->init("Number", 2);
+printf(Number1 + Number2);
