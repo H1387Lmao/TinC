@@ -1,4 +1,5 @@
 import inspect
+import errors
 
 class ReturnException(Exception):
 	def __init__(self, value=None):
@@ -45,7 +46,7 @@ class Table:
 	def __setitem__(self, item, value):
 		self.elements[item] = value
 	def __getitem__(self, item):
-		return self.elements[item]
+		return self.elements.get(item)
 
 	def __getattr__(self, value):
 		return self.elements.get(value, None)
@@ -72,18 +73,19 @@ class Table:
 class MathEval:
 	_numeric = ((int, int),)
 	_string_numeric = ((str, str), (str, int), (int, str))
+	_float = ((float, float), (int, float), (float, int))
 
 	pairs = {
-		"add": _numeric + _string_numeric,
-		"sub": _numeric,
-		"mul": _numeric + _string_numeric,
-		"div": _numeric,
-		"eq":  _numeric + _string_numeric,
-		"ne":  _numeric + _string_numeric,
-		"me":  _numeric,  # More or equal (>=)
-		"le":  _numeric,  # Less or equal (<=)
-		"ls":  _numeric,  # Less than (<)
-		"mr":  _numeric,  # More than (>)
+		"add": _numeric + _string_numeric + _float,
+		"sub": _numeric + _float,
+		"mul": _numeric + _string_numeric + _float,
+		"div": _numeric + _float,
+		"eq":  _numeric + _string_numeric + _float,
+		"ne":  _numeric + _string_numeric + _float,
+		"me":  _numeric + _float,  # More or equal (>=)
+		"le":  _numeric + _float ,  # Less or equal (<=)
+		"ls":  _numeric + _float,  # Less than (<)
+		"mr":  _numeric + _float,  # More than (>)
 	}
 
 	@staticmethod

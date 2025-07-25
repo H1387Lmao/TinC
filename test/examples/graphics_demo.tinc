@@ -1,0 +1,17 @@
+use glib;
+use iolib;
+
+let window = createWindow("Graphics Demo",Vector2(640,480));
+let text = Text("Hello World", Vector2(0,0), Vector2(300,300));
+let rectangle = Rectangle(Vector2(230, 250), Vector2(270, 50));
+
+window->add(text);
+let circle;
+for(i in 1..2){
+	circle = Circle(Vector2(350*i*(1/2)+100,170), 30); 
+	window->add(circle);
+}
+
+window->add(rectangle);
+
+window->run();
